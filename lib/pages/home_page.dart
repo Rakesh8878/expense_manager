@@ -1,35 +1,43 @@
 import 'package:expense_manager/models/transaction.dart';
+import 'package:expense_manager/widgets/chart.dart';
 import 'package:expense_manager/widgets/new_transaction.dart';
 import 'package:expense_manager/widgets/transaction_list.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
-
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-
   final List<Transaction> _userTranscations = [
     // Transaction(id: 't1', title: 'New Shoe', amount: 500, date: DateTime.now()),
     // Transaction(id: 't2', title: 'Grocery', amount: 1000, date: DateTime.now())
   ];
 
-  void _addnewTranscation(String tilte, double amount){
-    final newTxn = Transaction(title: tilte, amount: amount, date: DateTime.now(), id: DateTime.now().toString());
+  List<Transaction> get _recentTransaction {
+    return _userTranscations.where((tx) {
+      return tx.date.isAfter(DateTime.now().subtract(Duration(days: 7)));
+    }).toList();
+  }
+
+  void _addnewTranscation(String tilte, double amount) {
+    final newTxn = Transaction(
+        title: tilte,
+        amount: amount,
+        date: DateTime.now(),
+        id: DateTime.now().toString());
     setState(() {
-     this._userTranscations.add(newTxn);
+      this._userTranscations.add(newTxn);
     });
   }
 
-  void _startAddNewTransaction(BuildContext context){
+  void _startAddNewTransaction(BuildContext context) {
     showModalBottomSheet(
-      context: context,
-      builder: (_) {
-        return NewTransaction(_addnewTranscation);
-      }
-    );
+        context: context,
+        builder: (_) {
+          return NewTransaction(_addnewTranscation);
+        });
   }
 
   @override
@@ -51,14 +59,7 @@ class _HomePageState extends State<HomePage> {
           //  mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(
-              width: double.infinity,
-              child: Card(
-                color: Colors.blue,
-                child: Text("Chart"),
-                elevation: 5,
-              ),
-            ),
+            Chart(_recentTransaction),
             TransactionList(_userTranscations),
           ],
         ),
@@ -66,9 +67,7 @@ class _HomePageState extends State<HomePage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
         onPressed: () => _startAddNewTransaction(context),
-        child: Icon(
-          Icons.add_circle_outline
-        ),
+        child: Icon(Icons.add_circle_outline),
       ),
     );
   }
